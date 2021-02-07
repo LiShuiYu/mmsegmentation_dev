@@ -261,7 +261,12 @@ class BaseSegmentor(nn.Module):
         if show:
             mmcv.imshow(img, win_name, wait_time)
         if out_file is not None:
-            mmcv.imwrite(img, out_file)
+            import cv2
+            jpg_out_file = "/".join(out_file.split('/')[0:-1] + ['jpg'] + [out_file.split('/')[-1]])
+            png_out_file = "/".join(out_file.split('/')[0:-1] + ['png'] + [out_file.split('/')[-1].replace('jpg', 'png')])
+            
+            cv2.imwrite(png_out_file, np.copy(seg + 1).astype(np.uint16))
+            mmcv.imwrite(img, jpg_out_file)
 
         if not (show or out_file):
             warnings.warn('show==False and out_file is not specified, only '
