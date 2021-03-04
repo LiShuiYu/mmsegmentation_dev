@@ -263,7 +263,7 @@ class BaseSegmentor(nn.Module):
         if out_file is not None:
             import cv2
             jpg_out_file = "/".join(out_file.split('/')[0:-1] + ['jpg'] + [out_file.split('/')[-1]])
-            png_out_file = "/".join(out_file.split('/')[0:-1] + ['png'] + [out_file.split('/')[-1].replace('jpg', 'png')])
+            png_out_file = "/".join(out_file.split('/')[0:-1] + ['results'] + [out_file.split('/')[-1].replace('jpg', 'png')])
             
             cv2.imwrite(png_out_file, np.copy(seg + 1).astype(np.uint16))
             mmcv.imwrite(img, jpg_out_file)

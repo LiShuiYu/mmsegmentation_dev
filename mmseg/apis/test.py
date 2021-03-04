@@ -1,3 +1,4 @@
+import os
 import os.path as osp
 import pickle
 import shutil
@@ -51,15 +52,34 @@ def single_gpu_test(model,
         list: The prediction results.
     """
 
+    if show or out_dir:
+        os.makedirs(out_dir)
+        print("[*] Create root folder: {}".format(out_dir))
+
+        os.makedirs(osp.join(out_dir, 'jpg'))
+        print("[*] Create logits folder: {}".format(osp.join(out_dir, 'jpg')))
+
+        os.makedirs(osp.join(out_dir, 'logits'))
+        print("[*] Create logits folder: {}".format(osp.join(out_dir, 'logits')))
+
+        os.makedirs(osp.join(out_dir, 'results'))
+        print("[*] Create logits folder: {}".format(osp.join(out_dir, 'results')))
+
     model.eval()
     results = []
     dataset = data_loader.dataset
     prog_bar = mmcv.ProgressBar(len(dataset))
     for i, data in enumerate(data_loader):
         with torch.no_grad():
-            result = model(return_loss=False, **data)
+            logit, result = model(return_loss=False, **data)
 
         if show or out_dir:
+
+            torch.save(logit[0], 
+                      osp.join(out_dir, 
+                               'logits', 
+                               data['img_metas'][0].data[0][0]['ori_filename']).replace('jpg', 'pkl'))
+
             img_tensor = data['img'][0]
             img_metas = data['img_metas'][0].data[0]
             imgs = tensor2imgs(img_tensor, **img_metas[0]['img_norm_cfg'])

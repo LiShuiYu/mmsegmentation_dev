@@ -10,12 +10,12 @@ from .pascal_context import PascalContextDataset
 from .stare import STAREDataset
 from .voc import PascalVOCDataset
 
-from .competition import SuiChangDataset
+from .competition import SuiChangDataset, SuiChangRoadDataset
 
 __all__ = [
     'CustomDataset', 'build_dataloader', 'ConcatDataset', 'RepeatDataset',
     'DATASETS', 'build_dataset', 'PIPELINES', 'CityscapesDataset',
     'PascalVOCDataset', 'ADE20KDataset', 'PascalContextDataset',
     'ChaseDB1Dataset', 'DRIVEDataset', 'HRFDataset', 'STAREDataset',
-    'SuiChangDataset'
+    'SuiChangDataset', 'SuiChangRoadDataset'
 ]

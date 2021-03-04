@@ -1,14 +1,14 @@
 # competition settings
-num_classes = 10
+num_classes = 2
 
 # model settings
 norm_cfg = dict(type='SyncBN', requires_grad=True)
 model = dict(
     type='CascadeEncoderDecoder',
     num_stages=2,
-    pretrained=None,
+    pretrained='./pretrained/hrnetv2_w18-00eb2006.pth',
     backbone=dict(
-        type='SCSE_HRNet',
+        type='HRNet',
         norm_cfg=norm_cfg,
         norm_eval=False,
         extra=dict(
@@ -51,7 +51,10 @@ model = dict(
             norm_cfg=norm_cfg,
             align_corners=False,
             loss_decode=dict(
-                type='CrossEntropyLoss', use_sigmoid=False, loss_weight=0.4)),
+                type='CrossEntropyLoss', 
+                use_sigmoid=False, 
+                loss_weight=0.4,
+                class_weight=[0.1, 10.0])),
         dict(
             type='OCRHead',
             in_channels=[18, 36, 72, 144],
@@ -64,14 +67,17 @@ model = dict(
             norm_cfg=norm_cfg,
             align_corners=False,
             loss_decode=dict(
-                type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0)),
+                type='CrossEntropyLoss', 
+                use_sigmoid=False, 
+                loss_weight=1.0,
+                class_weight=[0.1, 10.0])),
     ],
     # model training and testing settings
     train_cfg=dict(),
     test_cfg=dict(mode='whole'))
 
 # dataset settings
-dataset_type = 'SuiChangDataset'
+dataset_type = 'SuiChangRoadDataset'
 data_root = '/dataset/suichang'
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
@@ -93,7 +99,8 @@ test_pipeline = [
     dict(
         type='MultiScaleFlipAug',
         img_scale=(512, 512),
-        img_ratios=[0.5, 0.75, 1.0, 1.25, 1.5, 1.75],
+        # img_ratios=[0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0],
+        img_ratios=[2.0, 3.0, 4.0],
         flip=True,
         transforms=[
             dict(type='Resize', keep_ratio=True),
@@ -104,28 +111,30 @@ test_pipeline = [
         ])
 ]
 data = dict(
-    samples_per_gpu=12,
+    samples_per_gpu=15,
     workers_per_gpu=4,
     train=dict(
         type=dataset_type,
         data_root=data_root,
-        img_dir='rgb_images/train',
-        ann_dir='labels/mmlab_train',
-        pipeline=train_pipeline),
+        img_dir='rgb_images/train_road_128',
+        ann_dir='labels/road_mmlab_train_128',
+        pipeline=train_pipeline,),
     val=dict(
         type=dataset_type,
         data_root=data_root,
-        img_dir='rgb_images/train',
-        ann_dir='labels/mmlab_train',
+        img_dir='rgb_images/validation_road_128',
+        ann_dir='labels/road_mmlab_validation_128',
         pipeline=test_pipeline),
     test=dict(
         type=dataset_type,
         data_root=data_root,
         img_dir='rgb_images/test_partA',
+        # img_dir='rgb_images/validation_road_256',
+        # ann_dir='labels/road_mmlab_validation_256',
         pipeline=test_pipeline))
 
 # optimizer
-optimizer = dict(type='SGD', lr=1e-2, momentum=0.9, weight_decay=0.0005)
+optimizer = dict(type='SGD', lr=0.01, momentum=0.9, weight_decay=0.0005)
 optimizer_config = dict()
 # learning policy
 lr_config = dict(policy='poly', power=0.9, min_lr=1e-5, by_epoch=False)
@@ -144,7 +153,7 @@ log_config = dict(
 # yapf:enable
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-load_from = '/workspace/mmsegmentation_dev/work_dirs/repeat_suichang_ocrnet_hr18_512x512_60k/iter_60000.pth'
+load_from = './work_dirs/suichang_road_ocrnet_hr18_512x512_60k/latest.pth'
 resume_from = None
 workflow = [('train', 1)]
 cudnn_benchmark = True

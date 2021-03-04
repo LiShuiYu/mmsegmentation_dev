@@ -47,3 +47,17 @@ class SuiChangDataset(CustomDataset):
         
         print_log(f'Loaded {len(img_infos)} images', logger=get_root_logger())
         return img_infos
+
+
+@DATASETS.register_module()
+class SuiChangRoadDataset(CustomDataset):
+
+    CLASSES = ['Background', 'Road']
+
+    PALETTE = [[0, 0, 0], [0, 255, 0]]
+
+    def __init__(self, **kwargs):
+        super(SuiChangRoadDataset, self).__init__(
+            img_suffix='.jpg',
+            seg_map_suffix='.png',
+            **kwargs)

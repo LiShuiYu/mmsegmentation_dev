@@ -270,8 +270,9 @@ class EncoderDecoder(BaseSegmentor):
             return seg_pred
         seg_pred = seg_pred.cpu().numpy()
         # unravel batch dim
+        seg_logit = list(seg_logit)
         seg_pred = list(seg_pred)
-        return seg_pred
+        return seg_logit, seg_pred
 
     def aug_test(self, imgs, img_metas, rescale=True):
         """Test with augmentations.
@@ -289,5 +290,6 @@ class EncoderDecoder(BaseSegmentor):
         seg_pred = seg_logit.argmax(dim=1)
         seg_pred = seg_pred.cpu().numpy()
         # unravel batch dim
+        seg_logit = list(seg_logit)
         seg_pred = list(seg_pred)
-        return seg_pred
+        return seg_logit, seg_pred

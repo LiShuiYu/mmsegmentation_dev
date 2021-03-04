@@ -6,9 +6,9 @@ norm_cfg = dict(type='SyncBN', requires_grad=True)
 model = dict(
     type='CascadeEncoderDecoder',
     num_stages=2,
-    pretrained=None,
+    pretrained='./pretrained/hrnetv2_w48-d2186c55.pth',
     backbone=dict(
-        type='SCSE_HRNet',
+        type='HRNet',
         norm_cfg=norm_cfg,
         norm_eval=False,
         extra=dict(
@@ -23,24 +23,24 @@ model = dict(
                 num_branches=2,
                 block='BASIC',
                 num_blocks=(4, 4),
-                num_channels=(18, 36)),
+                num_channels=(48, 96)),
             stage3=dict(
                 num_modules=4,
                 num_branches=3,
                 block='BASIC',
                 num_blocks=(4, 4, 4),
-                num_channels=(18, 36, 72)),
+                num_channels=(48, 96, 192)),
             stage4=dict(
                 num_modules=3,
                 num_branches=4,
                 block='BASIC',
                 num_blocks=(4, 4, 4, 4),
-                num_channels=(18, 36, 72, 144)))),
+                num_channels=(48, 96, 192, 384)))),
     decode_head=[
         dict(
             type='FCNHead',
-            in_channels=[18, 36, 72, 144],
-            channels=sum([18, 36, 72, 144]),
+            in_channels=[48, 96, 192, 384],
+            channels=sum([48, 96, 192, 384]),
             in_index=(0, 1, 2, 3),
             input_transform='resize_concat',
             kernel_size=1,
@@ -54,7 +54,7 @@ model = dict(
                 type='CrossEntropyLoss', use_sigmoid=False, loss_weight=0.4)),
         dict(
             type='OCRHead',
-            in_channels=[18, 36, 72, 144],
+            in_channels=[48, 96, 192, 384],
             in_index=(0, 1, 2, 3),
             input_transform='resize_concat',
             channels=512,
@@ -93,7 +93,7 @@ test_pipeline = [
     dict(
         type='MultiScaleFlipAug',
         img_scale=(512, 512),
-        img_ratios=[0.5, 0.75, 1.0, 1.25, 1.5, 1.75],
+        img_ratios=[1.0, 1.25, 1.5, 1.75, 2.0, 2.5],
         flip=True,
         transforms=[
             dict(type='Resize', keep_ratio=True),
@@ -104,7 +104,7 @@ test_pipeline = [
         ])
 ]
 data = dict(
-    samples_per_gpu=12,
+    samples_per_gpu=8,
     workers_per_gpu=4,
     train=dict(
         type=dataset_type,
@@ -125,10 +125,10 @@ data = dict(
         pipeline=test_pipeline))
 
 # optimizer
-optimizer = dict(type='SGD', lr=1e-2, momentum=0.9, weight_decay=0.0005)
+optimizer = dict(type='SGD', lr=1e-5, momentum=0.9, weight_decay=0.0005)
 optimizer_config = dict()
 # learning policy
-lr_config = dict(policy='poly', power=0.9, min_lr=1e-5, by_epoch=False)
+lr_config = dict(policy='poly', power=0.9, min_lr=1e-6, by_epoch=False)
 # runtime settings
 runner = dict(type='IterBasedRunner', max_iters=60000)
 checkpoint_config = dict(by_epoch=False, interval=2000)
@@ -136,7 +136,7 @@ evaluation = dict(interval=2000, metric='mIoU')
 
 # yapf:disable
 log_config = dict(
-    interval=50,
+    interval=200,
     hooks=[
         dict(type='TextLoggerHook', by_epoch=False),
         # dict(type='TensorboardLoggerHook')
@@ -144,7 +144,7 @@ log_config = dict(
 # yapf:enable
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-load_from = '/workspace/mmsegmentation_dev/work_dirs/repeat_suichang_ocrnet_hr18_512x512_60k/iter_60000.pth'
+load_from = './work_dirs/suichang_ocrnet_hr48_512x512_60k/latest.pth'
 resume_from = None
 workflow = [('train', 1)]
 cudnn_benchmark = True

@@ -93,7 +93,8 @@ test_pipeline = [
     dict(
         type='MultiScaleFlipAug',
         img_scale=(512, 512),
-        img_ratios=[0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0],
+        img_ratios=[0.5, 0.75, 1.0, 1.25, 1.5, 1.75],
+        # img_ratios=[1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5, 2.75, 3.0],
         flip=True,
         transforms=[
             dict(type='Resize', keep_ratio=True),
@@ -130,7 +131,7 @@ optimizer_config = dict()
 # learning policy
 lr_config = dict(policy='poly', power=0.9, min_lr=1e-6, by_epoch=False)
 # runtime settings
-runner = dict(type='IterBasedRunner', max_iters=60000)
+runner = dict(type='IterBasedRunner', max_iters=30000)
 checkpoint_config = dict(by_epoch=False, interval=2000)
 evaluation = dict(interval=2000, metric='mIoU')
 
@@ -144,7 +145,7 @@ log_config = dict(
 # yapf:enable
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-load_from = None
+load_from = '/workspace/mmsegmentation_dev/work_dirs/repeat_suichang_ocrnet_hr18_512x512_60k/iter_60000.pth'
 resume_from = None
 workflow = [('train', 1)]
 cudnn_benchmark = True

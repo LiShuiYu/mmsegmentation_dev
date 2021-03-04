@@ -110,7 +110,7 @@ def train_segmentor(model,
         runner.register_hook(eval_hook(val_dataloader, **eval_cfg))
 
     if cfg.resume_from:
-        runner.resume(cfg.resume_from)
+        runner.resume(cfg.resume_from, map_location='cpu')
     elif cfg.load_from:
         runner.load_checkpoint(cfg.load_from, map_location='cpu')
     runner.run(data_loaders, cfg.workflow)
